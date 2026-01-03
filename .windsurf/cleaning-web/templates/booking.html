@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Book {{ service.name }} - CleanPro{% endblock %}
+
+{% block content %}
+<!-- Booking Header -->
+<section class="booking-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#services">Services</a></li>
+                        <li class="breadcrumb-item active">Booking</li>
+                    </ol>
+                </nav>
+                <h1 class="display-5 fw-bold mt-3 text-center">Book {{ service.name }}</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Booking Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Service Summary -->
+            <div class="col-lg-4 mb-4">
+                <div class="service-summary-card">
+                    <div class="service-summary-image">
+                        <img src="{{ url_for('static', filename='images/service-' + (service.id|string) + '.png') }}" alt="{{ service.name }}" class="img-fluid">
+                    </div>
+                    <div class="service-summary-body">
+                        <h4>{{ service.name }}</h4>
+                        <p class="text-muted">{{ service.description }}</p>
+                        <div class="service-summary-meta">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="fas fa-tag"></i> Price:</span>
+                                <strong>${{ "%.2f"|format(service.price) }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-clock"></i> Duration:</span>
+                                <strong>{{ service.duration }} hours</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="col-lg-8">
+                <div class="booking-form-card">
+                    <h3 class="mb-4">Complete Your Booking</h3>
+                    <form method="POST" action="{{ url_for('book') }}" id="bookingForm">
+                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                        
+                        <!-- Date and Time Selection -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">Preferred Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="time" class="form-label">Preferred Time *</label>
+                                <select class="form-select" id="time" name="time" required>
+                                    <option value="">Select a time</option>
+                                    <option value="08:00">8:00 AM</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Customer Information -->
+                        <h4 class="mb-3">Your Information</h4>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <h4 class="mb-3">Service Address</h4>
+                        <div class="mb-4">
+                            <label for="address" class="form-label">Complete Address *</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" required placeholder="Enter your complete address including house number, street, barangay, and city"></textarea>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div class="mb-4">
+                            <label for="instructions" class="form-label">Special Instructions (Optional)</label>
+                            <textarea class="form-control" id="instructions" name="instructions" rows="3" placeholder="Any special requests or instructions for our cleaning team"></textarea>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-calendar-check me-2"></i>Complete Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Booking Terms</h6>
+                <ul>
+                    <li>Bookings must be made at least 24 hours in advance</li>
+                    <li>Cancellations must be made 12 hours before the scheduled time</li>
+                    <li>Payment is due upon completion of service</li>
+                    <li>We are not responsible for lost or damaged items</li>
+                </ul>
+                
+                <h6>Service Terms</h6>
+                <ul>
+                    <li>Our team will arrive within the scheduled time window</li>
+                    <li>Please ensure someone is available to provide access</li>
+                    <li>Additional charges may apply for heavily soiled areas</li>
+                    <li>We reserve the right to refuse service for safety reasons</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set minimum date to tomorrow
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateInput.min = tomorrow.toISOString().split('T')[0];
+    
+    // Form validation
+    const form = document.getElementById('bookingForm');
+    form.addEventListener('submit', function(e) {
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        
+        // Basic phone validation
+        if (!/^[\d\s\-\+\(\)]+$/.test(phone)) {
+            alert('Please enter a valid phone number');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Basic email validation
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert('Please enter a valid email address');
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

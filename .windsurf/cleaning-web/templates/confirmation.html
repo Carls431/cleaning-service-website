@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmation - CleanPro{% endblock %}
+
+{% block content %}
+<!-- Confirmation Header -->
+<section class="confirmation-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="confirmation-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1 class="display-5 fw-bold mt-4">Booking Confirmed!</h1>
+                <p class="lead">Thank you for choosing CleanPro. Your booking has been successfully received.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Booking Details Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Booking Reference Card -->
+                <div class="confirmation-card mb-4">
+                    <div class="confirmation-header-info">
+                        <h3>Booking Reference</h3>
+                        <div class="reference-number">{{ booking.booking_reference }}</div>
+                        <p class="text-muted">Please save this reference number for your records</p>
+                    </div>
+                </div>
+
+                <!-- Service Details Card -->
+                <div class="confirmation-card mb-4">
+                    <h4 class="mb-3"><i class="fas fa-broom me-2"></i>Service Details</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Service:</strong> {{ booking.service.name }}</p>
+                            <p><strong>Duration:</strong> {{ booking.service.duration }} hours</p>
+                            <p><strong>Total Price:</strong> ${{ "%.2f"|format(booking.total_price) }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date:</strong> {{ booking.booking_date.strftime('%B %d, %Y') }}</p>
+                            <p><strong>Time:</strong> {{ booking.booking_time.strftime('%I:%M %p') }}</p>
+                            <p><strong>Status:</strong> <span class="badge bg-warning">{{ booking.status.title() }}</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information Card -->
+                <div class="confirmation-card mb-4">
+                    <h4 class="mb-3"><i class="fas fa-user me-2"></i>Customer Information</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ booking.customer_name }}</p>
+                            <p><strong>Email:</strong> {{ booking.customer_email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Phone:</strong> {{ booking.customer_phone }}</p>
+                            <p><strong>Address:</strong> {{ booking.customer_address }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Steps Card -->
+                <div class="confirmation-card mb-4">
+                    <h4 class="mb-3"><i class="fas fa-info-circle me-2"></i>What's Next?</h4>
+                    <div class="next-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Confirmation Email</h5>
+                                <p>You will receive a confirmation email with all the booking details shortly.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>Phone Call</h5>
+                                <p>Our team will call you within 24 hours to confirm your booking and answer any questions.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>Service Day</h5>
+                                <p>Our professional cleaning team will arrive at the scheduled time and provide excellent service.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Support Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h3>Need Help?</h3>
+                <p class="text-muted">If you have any questions or need to modify your booking, our support team is here to help.</p>
+                <div class="mt-4">
+                    <a href="tel:+639123456789" class="btn btn-outline-primary me-3">
+                        <i class="fas fa-phone me-2"></i>Call Us
+                    </a>
+                    <a href="mailto:info@cleanpro.com" class="btn btn-outline-primary">
+                        <i class="fas fa-envelope me-2"></i>Email Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-print functionality (optional)
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add any additional JavaScript functionality here
+    console.log('Booking confirmed:', '{{ booking.booking_reference }}');
+});
+
+// Share functionality (optional)
+function shareBooking() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'CleanPro Booking Confirmation',
+            text: 'My cleaning service booking is confirmed! Reference: {{ booking.booking_reference }}',
+            url: window.location.href
+        });
+    }
+}
+</script>
+{% endblock %}

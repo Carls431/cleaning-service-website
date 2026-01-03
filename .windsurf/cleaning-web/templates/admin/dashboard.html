@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - CleanPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Bookings</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ bookings|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Pending</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ bookings|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Confirmed</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ bookings|selectattr('status', 'equalto', 'confirmed')|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱{{ "%.2f"|format(bookings|sum(attribute='total_price')) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-peso-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Bookings</h6>
+                    <a href="{{ url_for('admin_services') }}" class="btn btn-sm btn-primary">Manage Services</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="bookingsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.booking_reference }}</td>
+                                    <td>
+                                        <div>{{ booking.customer_name }}</div>
+                                        <small class="text-muted">{{ booking.customer_email }}</small>
+                                    </td>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>{{ booking.booking_date.strftime('%b %d, %Y') }}</td>
+                                    <td>{{ booking.booking_time.strftime('%I:%M %p') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'warning' if booking.status == 'pending' else 'success' if booking.status == 'confirmed' else 'secondary' }}">
+                                            {{ booking.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>₱{{ "%.2f"|format(booking.total_price) }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewBooking('{{ booking.id }}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="confirmBooking('{{ booking.id }}')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="cancelBooking('{{ booking.id }}')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Booking Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="bookingDetails">
+                <!-- Booking details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// View booking details
+function viewBooking(bookingId) {
+    // Show loading state
+    document.getElementById('bookingDetails').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p class="mt-3">Loading booking details...</p>
+        </div>
+    `;
+    
+    // Fetch booking data from server
+    fetch(`/admin/booking/${bookingId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Display booking details
+            document.getElementById('bookingDetails').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Booking Reference</h6>
+                        <p>${data.booking_reference}</p>
+                        
+                        <h6>Customer Information</h6>
+                        <p><strong>Name:</strong> ${data.customer_name}</p>
+                        <p><strong>Email:</strong> ${data.customer_email}</p>
+                        <p><strong>Phone:</strong> ${data.customer_phone}</p>
+                        <p><strong>Address:</strong> ${data.customer_address}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Service Details</h6>
+                        <p><strong>Service:</strong> ${data.service_name}</p>
+                        <p><strong>Date:</strong> ${data.booking_date}</p>
+                        <p><strong>Time:</strong> ${data.booking_time}</p>
+                        <p><strong>Total Price:</strong> $${data.total_price.toFixed(2)}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-warning">${data.status}</span></p>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('bookingDetails').innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    <p class="mt-3">Error loading booking details</p>
+                </div>
+            `;
+        });
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    modal.show();
+}
+
+// Confirm booking
+function confirmBooking(bookingId) {
+    if (confirm('Are you sure you want to confirm this booking?')) {
+        fetch(`/admin/confirm/${bookingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Booking confirmed successfully!');
+                location.reload();
+            } else {
+                alert('Error confirming booking');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error confirming booking');
+        });
+    }
+}
+
+// Cancel booking
+function cancelBooking(bookingId) {
+    if (confirm('Are you sure you want to cancel this booking?')) {
+        fetch(`/admin/cancel/${bookingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Booking cancelled successfully!');
+                location.reload();
+            } else {
+                alert('Error cancelling booking');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error cancelling booking');
+        });
+    }
+}
+
+// Initialize DataTable
+document.addEventListener('DOMContentLoaded', function() {
+    // You can initialize DataTable here if needed
+    $('#bookingsTable').DataTable({
+        "order": [[3, "desc"]] // Sort by date column
+    });
+});
+</script>
+{% endblock %}
